@@ -73,9 +73,16 @@ namespace TestBinaryConverter
 
             var buf = BinaryConvert.SerializeObject(orig);
 
-            var obj = BinaryConvert.DeserializeObject<Record>(buf);
+            var cloned = BinaryConvert.DeserializeObject<Record>(buf);
 
-            var str = JsonConvert.SerializeObject(orig);
+            var strOrig = JsonConvert.SerializeObject(orig);
+            var strCloned = JsonConvert.SerializeObject(cloned);
+
+            Console.WriteLine($"==================================================================");
+            Console.WriteLine($"strOrig: {strOrig}");
+            Console.WriteLine($"==================================================================");
+            Console.WriteLine($"strCloned: {strCloned}");
+            Console.WriteLine($"==================================================================");
         }
     }
 }
