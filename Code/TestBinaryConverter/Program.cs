@@ -40,7 +40,8 @@ namespace TestBinaryConverter
 
         public List<int> IntList { get; set; }
         public List<SubRecord> SubRecordList { get; set; }
-        //public Dictionary<int, int> IntDict { get; set; }
+        public Dictionary<int, int> IntDict { get; set; }
+        public Dictionary<string, SubRecord> SubRecordDict { get; set; }
 
     }
 
@@ -91,6 +92,19 @@ namespace TestBinaryConverter
                         UInt64 = 18,
                         Char = 'b',
                     }
+                },
+                IntDict = new Dictionary<int, int>
+                {
+                    { 0 , 0 },
+                    { 1 , 1 },
+                    { 2 , 4 },
+                    { 3 , 9 },
+                    { 4 , 16 },
+                },
+                SubRecordDict = new Dictionary<string, SubRecord>
+                {
+                    { "key1" , new SubRecord{Bool0 = true } },
+                    { "key2" , new SubRecord{Bool1 = true } }
                 }
             };
 
