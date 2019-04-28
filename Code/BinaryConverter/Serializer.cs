@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -15,16 +16,15 @@ namespace BinaryConverter
             {
                 using (BinaryTypesWriter bw = new BinaryTypesWriter(ms))
                 {
-                    SerializeObject(value, bw);
+                    SerializeObject(typeof(T), value, bw);
                     return ms.ToArray();
                 }
             }
         }
 
-        private static void SerializeObject<T>(T value, BinaryTypesWriter bw)
+        private static void SerializeObject<T>(Type type, T value, BinaryTypesWriter bw)
         {
-
-            var type = value.GetType();
+            //var type = value.GetType();
 
             if (type.IsPrimitive)
             {
@@ -81,6 +81,12 @@ namespace BinaryConverter
 
             if (type.IsClass)
             {
+                if (type.IsGenericType && (type.GetGenericTypeDefinition() == typeof(List<>)))
+                {
+                    SerializeGenericList(type, (IList)value, bw);
+                    return;
+                }
+
                 switch (type.FullName)
                 {
                     case SystemTypeDefs.FullNameString:
@@ -95,6 +101,22 @@ namespace BinaryConverter
 
         }
 
+        private static void SerializeGenericList<T>(Type type, T value, BinaryTypesWriter bw) where T : IList
+        {
+            if (value == null)
+            {
+                bw.Write7BitLong(-1);
+                return;
+            }
+            var count = value.Count;
+            bw.Write7BitLong(count);
+            Type genericArgtype = type.GetGenericArguments()[0];
+            for (int i = 0; i < count; i++)
+            {
+                SerializeObject(genericArgtype, value[i], bw);
+            }
+        }
+
         private static void SerializeClass<T>(T value, BinaryTypesWriter bw) where T : class
         {
             var props = value.GetType().GetProperties()
@@ -104,7 +126,7 @@ namespace BinaryConverter
             foreach (var prop in props)
             {
                 var val = prop.GetValue(value);
-                SerializeObject(val, bw);
+                SerializeObject(prop.PropertyType, val, bw);
             }
 
         }

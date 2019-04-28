@@ -1,6 +1,7 @@
 ﻿using BinaryConverter;
 using Newtonsoft.Json;
 using System;
+using System.Collections.Generic;
 
 namespace TestBinaryConverter
 {
@@ -37,6 +38,10 @@ namespace TestBinaryConverter
         public double Real64 { get; set; }
         public TestEnum TestEnum { get; set; }
 
+        public List<int> IntList { get; set; }
+        public List<SubRecord> SubRecordList { get; set; }
+        //public Dictionary<int, int> IntDict { get; set; }
+
     }
 
     class Program
@@ -69,6 +74,24 @@ namespace TestBinaryConverter
                 Real64 = 1234567890.987654321,
                 //TestEnum = (TestEnum)(17)//.Val1,
                 TestEnum = TestEnum.Val1,
+                IntList = new List<int> { 1, 4, 9, 16 },
+                SubRecordList = new List<SubRecord>
+                {
+                    new SubRecord
+                    {
+                        Bool0 = false,
+                        Bool1 = true,
+                        Byte = 11,
+                        SByte = -12,
+                        Int16 = -13,
+                        UInt16 = 14,
+                        Int32 = 15,
+                        UInt32 = 16,
+                        Int64 = 17,
+                        UInt64 = 18,
+                        Char = 'b',
+                    }
+                }
             };
 
             var buf = BinaryConvert.SerializeObject(orig);
@@ -79,9 +102,9 @@ namespace TestBinaryConverter
             var strCloned = JsonConvert.SerializeObject(cloned);
 
             Console.WriteLine($"==================================================================");
-            Console.WriteLine($"strOrig: {strOrig}");
+            Console.WriteLine($"strOrig:\r\n {strOrig}");
             Console.WriteLine($"==================================================================");
-            Console.WriteLine($"strCloned: {strCloned}");
+            Console.WriteLine($"strCloned:\r\n {strCloned}");
             Console.WriteLine($"==================================================================");
         }
     }
