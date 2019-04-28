@@ -81,6 +81,10 @@ namespace BinaryConverter
                 {
                     return DeserializeGenericList(br, type);
                 }
+                if (type.IsGenericType && (type.GetGenericTypeDefinition() == typeof(Dictionary<,>)))
+                {
+                    return DeserializeGenericDictionary(br, type);
+                }
 
                 switch (type.FullName)
                 {
@@ -93,6 +97,7 @@ namespace BinaryConverter
 
             return null;
         }
+
 
         private static object DeserializeGenericList(BinaryTypesReader br, Type type)
         {
@@ -107,6 +112,25 @@ namespace BinaryConverter
             for (int i = 0; i < count; i++)
             {
                 instance.Add(DeserializeObject(br, genericArgtype));
+            }
+            return instance;
+        }
+
+
+        private static object DeserializeGenericDictionary(BinaryTypesReader br, Type type)
+        {
+            int count = br.Read7BitInt();
+            if (count == -1)
+            {
+                return null;
+            }
+            var instance = (IDictionary)Activator.CreateInstance(type);
+            Type genericArgKey = type.GetGenericArguments()[0];
+            Type genericArgVal = type.GetGenericArguments()[1];
+
+            for (int i = 0; i < count; i++)
+            {
+                instance.Add(DeserializeObject(br, genericArgKey), DeserializeObject(br, genericArgVal));
             }
             return instance;
         }

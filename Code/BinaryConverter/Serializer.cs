@@ -87,6 +87,12 @@ namespace BinaryConverter
                     return;
                 }
 
+                if (type.IsGenericType && (type.GetGenericTypeDefinition() == typeof(Dictionary<,>)))
+                {
+                    SerializeGenericDictionary(type, (IDictionary)value, bw);
+                    return;
+                }
+
                 switch (type.FullName)
                 {
                     case SystemTypeDefs.FullNameString:
@@ -101,6 +107,7 @@ namespace BinaryConverter
 
         }
 
+
         private static void SerializeGenericList<T>(Type type, T value, BinaryTypesWriter bw) where T : IList
         {
             if (value == null)
@@ -114,6 +121,25 @@ namespace BinaryConverter
             for (int i = 0; i < count; i++)
             {
                 SerializeObject(genericArgtype, value[i], bw);
+            }
+        }
+
+
+        private static void SerializeGenericDictionary(Type type, IDictionary value, BinaryTypesWriter bw)
+        {
+            if (value == null)
+            {
+                bw.Write7BitLong(-1);
+                return;
+            }
+            var count = value.Count;
+            bw.Write7BitLong(count);
+            Type genericArgKey = type.GetGenericArguments()[0];
+            Type genericArgVal = type.GetGenericArguments()[1];
+            foreach (var key in value.Keys)
+            {
+                SerializeObject(genericArgKey, key, bw);
+                SerializeObject(genericArgVal, value[key], bw);
             }
         }
 
