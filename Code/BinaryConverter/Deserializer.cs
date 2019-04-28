@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -76,6 +77,11 @@ namespace BinaryConverter
 
             if (type.IsClass)
             {
+                if (type.IsGenericType && (type.GetGenericTypeDefinition() == typeof(List<>)))
+                {
+                    return DeserializeGenericList(br, type);
+                }
+
                 switch (type.FullName)
                 {
                     case SystemTypeDefs.FullNameString:
@@ -86,6 +92,23 @@ namespace BinaryConverter
             }
 
             return null;
+        }
+
+        private static object DeserializeGenericList(BinaryTypesReader br, Type type)
+        {
+            int count = br.Read7BitInt();
+            if (count == -1)
+            {
+                return null;
+            }
+            var instance = (IList)Activator.CreateInstance(type);
+            Type genericArgtype = type.GetGenericArguments()[0];
+
+            for (int i = 0; i < count; i++)
+            {
+                instance.Add(DeserializeObject(br, genericArgtype));
+            }
+            return instance;
         }
 
         private static object DeserializeClass(BinaryTypesReader br, Type type)
