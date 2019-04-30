@@ -93,6 +93,14 @@ namespace BinaryConverter
                     return;
                 }
 
+                bool isNotNull = value != null;
+                bw.Write(isNotNull);
+
+                if (isNotNull == false)
+                {
+                    return;
+                }
+
                 switch (type.FullName)
                 {
                     case SystemTypeDefs.FullNameString:
