@@ -71,7 +71,7 @@ namespace BinaryConverter
                 switch (type.FullName)
                 {
                     case SystemTypeDefs.FullNameDateTime:
-                        return new DateTime(br.Read7BitLong());
+                        return new DateTime(br.Read7BitLong(), DateTimeKind.Utc);
                 }
             }
 
@@ -84,6 +84,13 @@ namespace BinaryConverter
                 if (type.IsGenericType && (type.GetGenericTypeDefinition() == typeof(Dictionary<,>)))
                 {
                     return DeserializeGenericDictionary(br, type);
+                }
+
+                bool isNotNull = br.ReadBoolean();
+
+                if (isNotNull == false)
+                {
+                    return null;
                 }
 
                 switch (type.FullName)

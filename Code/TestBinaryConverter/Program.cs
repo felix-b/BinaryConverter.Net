@@ -55,7 +55,7 @@ namespace TestBinaryConverter
             {
                 Id = 7,
                 Time = DateTime.UtcNow.Date,
-                Comment = "Bla!",
+                Comment = null,//"Bla!",
                 SubRecord = new SubRecord
                 {
                     Bool0 = false,
@@ -70,7 +70,7 @@ namespace TestBinaryConverter
                     UInt64 = 8,
                     Char = 'a',
                 },
-                Dec1 = 1234567890.987654321m,
+                Dec1 = 1234567890.987654m,
                 Real32 = 1234567890.987654321f,
                 Real64 = 1234567890.987654321,
                 //TestEnum = (TestEnum)(17)//.Val1,
@@ -107,6 +107,8 @@ namespace TestBinaryConverter
                     { "key2" , new SubRecord{Bool1 = true } }
                 }
             };
+
+            orig.SubRecordDict = null;
 
             var buf = BinaryConvert.SerializeObject(orig);
 
