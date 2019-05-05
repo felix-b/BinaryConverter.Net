@@ -12,10 +12,14 @@ namespace TestBinaryConverter
         Val10 = 10
     }
 
-    public class SubRecord
+    public class SubRecordBase
     {
         public bool Bool0 { get; set; }
         public bool Bool1 { get; set; }
+    }
+
+    public class SubRecord : SubRecordBase
+    {
         public byte Byte { get; set; }
         public sbyte SByte { get; set; }
         public short Int16 { get; set; }
@@ -27,6 +31,11 @@ namespace TestBinaryConverter
         public char Char { get; set; }
     }
 
+    //todo: 
+    // - nullable
+    // - Array
+    // - []
+    // - HashSet
     public class Record
     {
         public int Id { get; set; }
@@ -103,12 +112,12 @@ namespace TestBinaryConverter
                 },
                 SubRecordDict = new Dictionary<string, SubRecord>
                 {
-                    { "key1" , new SubRecord{Bool0 = true } },
-                    { "key2" , new SubRecord{Bool1 = true } }
+                    { "key1" , new SubRecord{Bool0 = true , Char = (char)11}},
+                    { "key2" , new SubRecord{Bool1 = true , Char = 'x'} },
                 }
             };
 
-            orig.SubRecordDict = null;
+            //orig.SubRecordDict = null;
 
             var buf = BinaryConvert.SerializeObject(orig);
 

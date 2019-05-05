@@ -8,6 +8,7 @@ using System.Text;
 
 namespace BinaryConverter
 {
+
     public static class Serializer
     {
         public static byte[] SerializeObject<T>(T value)
@@ -22,147 +23,59 @@ namespace BinaryConverter
             }
         }
 
-        private static void SerializeObject<T>(Type type, T value, BinaryTypesWriter bw)
+        internal static void SerializeObject<T>(Type type, T value, BinaryTypesWriter bw)
         {
-            //var type = value.GetType();
 
-            if (type.IsPrimitive)
+            var serializer = SerializerRegistry.GetSerializer(type);
+
+            if (serializer != null)
             {
-                switch (type.FullName)
+                if (type.IsClass)
                 {
-                    case SystemTypeDefs.FullNameBoolean:
-                    case SystemTypeDefs.FullNameByte:
-                    case SystemTypeDefs.FullNameSByte:
-                    case SystemTypeDefs.FullNameInt16:
-                    case SystemTypeDefs.FullNameUInt16:
-                    case SystemTypeDefs.FullNameInt32:
-                    case SystemTypeDefs.FullNameUInt32:
-                    case SystemTypeDefs.FullNameInt64:
-                    case SystemTypeDefs.FullNameUInt64:
-                    case SystemTypeDefs.FullNameChar:
-                        {
-                            var val = Convert.ChangeType(value, typeof(long));
-                            bw.Write7BitLong((long)val);
-                            break;
-                        }
-
-                    case SystemTypeDefs.FullNameSingle: // todo: compact
-                        bw.Write((float)(object)value);
-                        break;
-                    case SystemTypeDefs.FullNameDouble: // todo: compact
-                        bw.Write((double)(object)value);
-                        break;
+                    bw.Write(value != null);
+                    if (value == null)
+                    {
+                        return;
+                    }
                 }
-                return;
-            }
 
-            if (type.FullName == SystemTypeDefs.FullNameDecimal)
-            {
-                bw.WriteCompactDecimal((decimal)(object)value);
+                serializer.Serialize(bw, type, value);
                 return;
             }
 
             if (type.IsEnum)
             {
-                bw.Write7BitLong((int)(object)value);
-                return;
-            }
-
-            if (type.IsValueType)
-            {
-                switch (type.FullName)
-                {
-                    case SystemTypeDefs.FullNameDateTime:
-                        bw.Write7BitLong(((DateTime)(object)value).Ticks);
-                        break;
-                }
+                serializer = SerializerRegistry.GetSerializer(typeof(Enum));
+                serializer.Serialize(bw, type, value);
                 return;
             }
 
             if (type.IsClass)
             {
-                if (type.IsGenericType && (type.GetGenericTypeDefinition() == typeof(List<>)))
+                if (type.IsGenericType)
                 {
-                    SerializeGenericList(type, (IList)value, bw);
-                    return;
+                    serializer = SerializerRegistry.GetSerializer(type.GetGenericTypeDefinition());
+                    if (serializer != null)
+                    {
+                        serializer.Serialize(bw, type, value);
+                        return;
+                    }
                 }
 
-                if (type.IsGenericType && (type.GetGenericTypeDefinition() == typeof(Dictionary<,>)))
-                {
-                    SerializeGenericDictionary(type, (IDictionary)value, bw);
-                    return;
-                }
-
-                bool isNotNull = value != null;
-                bw.Write(isNotNull);
-
-                if (isNotNull == false)
+                bw.Write(value != null);
+                if (value == null)
                 {
                     return;
                 }
 
-                switch (type.FullName)
-                {
-                    case SystemTypeDefs.FullNameString:
-                        bw.Write((string)(object)value);
-                        break;
-                    default:
-                        SerializeClass((object)value, bw);
-                        break;
-                }
+                serializer = SerializerRegistry.GetSerializer(typeof(object));
+                serializer.Serialize(bw, type, value);
                 return;
             }
 
-        }
-
-
-        private static void SerializeGenericList<T>(Type type, T value, BinaryTypesWriter bw) where T : IList
-        {
-            if (value == null)
-            {
-                bw.Write7BitLong(-1);
-                return;
-            }
-            var count = value.Count;
-            bw.Write7BitLong(count);
-            Type genericArgtype = type.GetGenericArguments()[0];
-            for (int i = 0; i < count; i++)
-            {
-                SerializeObject(genericArgtype, value[i], bw);
-            }
-        }
-
-
-        private static void SerializeGenericDictionary(Type type, IDictionary value, BinaryTypesWriter bw)
-        {
-            if (value == null)
-            {
-                bw.Write7BitLong(-1);
-                return;
-            }
-            var count = value.Count;
-            bw.Write7BitLong(count);
-            Type genericArgKey = type.GetGenericArguments()[0];
-            Type genericArgVal = type.GetGenericArguments()[1];
-            foreach (var key in value.Keys)
-            {
-                SerializeObject(genericArgKey, key, bw);
-                SerializeObject(genericArgVal, value[key], bw);
-            }
-        }
-
-        private static void SerializeClass<T>(T value, BinaryTypesWriter bw) where T : class
-        {
-            var props = value.GetType().GetProperties()
-                .OrderBy(x => x.MetadataToken)
-                .ToList();
-
-            foreach (var prop in props)
-            {
-                var val = prop.GetValue(value);
-                SerializeObject(prop.PropertyType, val, bw);
-            }
+            throw new Exception($"SerializeObject: serializer not found for type {type.FullName}");
 
         }
+
     }
 }
