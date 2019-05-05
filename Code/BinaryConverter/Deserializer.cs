@@ -8,6 +8,12 @@ using System.Text;
 
 namespace BinaryConverter
 {
+    public class DeserializerContext
+    {
+        public Type Type { get; set; }
+        public BinaryTypesReader Reader { get; set; }
+    }
+
     public static class Deserializer
     {
         public static T DeserializeObject<T>(byte[] buf)
@@ -27,135 +33,55 @@ namespace BinaryConverter
             }
         }
 
-        private static object DeserializeObject(BinaryTypesReader br, Type type)
+        internal static object DeserializeObject(BinaryTypesReader br, Type type)
         {
-            if (type.IsPrimitive)
+            var serializer = SerializerRegistry.GetSerializer(type);
+
+            if (serializer != null)
             {
-                switch (type.FullName)
+                if (type.IsClass)
                 {
-                    case SystemTypeDefs.FullNameBoolean:
-                    case SystemTypeDefs.FullNameByte:
-                    case SystemTypeDefs.FullNameSByte:
-                    case SystemTypeDefs.FullNameInt16:
-                    case SystemTypeDefs.FullNameUInt16:
-                    case SystemTypeDefs.FullNameInt32:
-                    case SystemTypeDefs.FullNameUInt32:
-                    case SystemTypeDefs.FullNameInt64:
-                    case SystemTypeDefs.FullNameUInt64:
-                    case SystemTypeDefs.FullNameChar:
-                        {
-                            var val = br.Read7BitLong();
-                            return Convert.ChangeType(val, type);
-                        }
-                    case SystemTypeDefs.FullNameSingle: // todo: compact
-                        return br.ReadSingle();
-                    case SystemTypeDefs.FullNameDouble: // todo: compact
-                        return br.ReadDouble();
-
+                    if (br.ReadBoolean() == false) //null
+                    {
+                        return null;
+                    }
                 }
-            }
 
-            if (type.FullName == typeof(decimal).FullName)
-            {
-                return br.ReadCompactDecimal();
+                return serializer.Deserialize(br, type);
             }
 
             if (type.IsEnum)
             {
-                int val = (int)br.Read7BitLong();
-                return Enum.ToObject(type, val);
-            }
-
-            if (type.IsValueType)
-            {
-                switch (type.FullName)
-                {
-                    case SystemTypeDefs.FullNameDateTime:
-                        return new DateTime(br.Read7BitLong(), DateTimeKind.Utc);
-                }
+                serializer = SerializerRegistry.GetSerializer(typeof(Enum));
+                return serializer.Deserialize(br, type);
             }
 
             if (type.IsClass)
             {
-                if (type.IsGenericType && (type.GetGenericTypeDefinition() == typeof(List<>)))
+                if (type.IsGenericType)
                 {
-                    return DeserializeGenericList(br, type);
-                }
-                if (type.IsGenericType && (type.GetGenericTypeDefinition() == typeof(Dictionary<,>)))
-                {
-                    return DeserializeGenericDictionary(br, type);
+                    serializer = SerializerRegistry.GetSerializer(type.GetGenericTypeDefinition());
+                    if (serializer != null)
+                    {
+                        return serializer.Deserialize(br, type);
+                    }
                 }
 
-                bool isNotNull = br.ReadBoolean();
-
-                if (isNotNull == false)
+                if (br.ReadBoolean() == false) //null
                 {
                     return null;
                 }
 
-                switch (type.FullName)
-                {
-                    case SystemTypeDefs.FullNameString:
-                        return br.ReadString();
-                    default:
-                        return DeserializeClass(br, type);
-                }
+                serializer = SerializerRegistry.GetSerializer(typeof(object));
+                return serializer.Deserialize(br, type);
             }
 
-            return null;
+            throw new Exception($"DeserializeObject: serializer not found for type {type.FullName}");
         }
 
 
-        private static object DeserializeGenericList(BinaryTypesReader br, Type type)
-        {
-            int count = br.Read7BitInt();
-            if (count == -1)
-            {
-                return null;
-            }
-            var instance = (IList)Activator.CreateInstance(type);
-            Type genericArgtype = type.GetGenericArguments()[0];
-
-            for (int i = 0; i < count; i++)
-            {
-                instance.Add(DeserializeObject(br, genericArgtype));
-            }
-            return instance;
-        }
 
 
-        private static object DeserializeGenericDictionary(BinaryTypesReader br, Type type)
-        {
-            int count = br.Read7BitInt();
-            if (count == -1)
-            {
-                return null;
-            }
-            var instance = (IDictionary)Activator.CreateInstance(type);
-            Type genericArgKey = type.GetGenericArguments()[0];
-            Type genericArgVal = type.GetGenericArguments()[1];
 
-            for (int i = 0; i < count; i++)
-            {
-                instance.Add(DeserializeObject(br, genericArgKey), DeserializeObject(br, genericArgVal));
-            }
-            return instance;
-        }
-
-        private static object DeserializeClass(BinaryTypesReader br, Type type)
-        {
-            var props = type.GetProperties(BindingFlags.Instance | BindingFlags.Public)
-                .OrderBy(x => x.MetadataToken);
-
-            var instance = Activator.CreateInstance(type);
-
-
-            foreach (var prop in props)
-            {
-                prop.SetValue(instance, DeserializeObject(br, prop.PropertyType));
-            }
-
-            return instance;
-        }
     }
 }
