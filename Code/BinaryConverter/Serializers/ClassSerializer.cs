@@ -8,7 +8,7 @@ namespace BinaryConverter.Serializers
 {
     class ClassSerializer : BaseSerializer
     {
-        public override object Deserialize(BinaryTypesReader br, Type type)
+        public override object Deserialize(BinaryTypesReader br, Type type, SerializerSettings settings, ISerializerArg serializerArg)
         {
             var props = type.GetProperties(BindingFlags.Instance | BindingFlags.Public)
                 .OrderBy(x => x.MetadataToken);
@@ -18,13 +18,13 @@ namespace BinaryConverter.Serializers
 
             foreach (var prop in props)
             {
-                prop.SetValue(instance, Deserializer.DeserializeObject(br, prop.PropertyType));
+                prop.SetValue(instance, Serializer.DeserializeObject(br, prop.PropertyType, settings, null));
             }
 
             return instance;
         }
 
-        public override void Serialize(BinaryTypesWriter bw, Type type, object value)
+        public override void Serialize(BinaryTypesWriter bw, Type type, SerializerSettings settings, ISerializerArg serializerArg, object value)
         {
             var props = value.GetType().GetProperties()
                 .OrderBy(x => x.MetadataToken)
@@ -33,7 +33,7 @@ namespace BinaryConverter.Serializers
             foreach (var prop in props)
             {
                 var val = prop.GetValue(value);
-                Serializer.SerializeObject(prop.PropertyType, val, bw);
+                Serializer.SerializeObject(prop.PropertyType, val, bw, settings, null);
             }
         }
     }
