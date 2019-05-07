@@ -7,7 +7,7 @@ namespace BinaryConverter.Serializers
 {
     class DictionarySerializer : BaseSerializer
     {
-        public override object Deserialize(BinaryTypesReader br, Type type)
+        public override object Deserialize(BinaryTypesReader br, Type type, SerializerSettings settings, ISerializerArg serializerArg)
         {
             int count = br.Read7BitInt();
             if (count == -1)
@@ -20,12 +20,14 @@ namespace BinaryConverter.Serializers
 
             for (int i = 0; i < count; i++)
             {
-                instance.Add(Deserializer.DeserializeObject(br, genericArgKey), Deserializer.DeserializeObject(br, genericArgVal));
+                instance.Add(
+                    Serializer.DeserializeObject(br, genericArgKey, settings, null), //key
+                    Serializer.DeserializeObject(br, genericArgVal, settings, null)); //val
             }
             return instance;
         }
 
-        public override void Serialize(BinaryTypesWriter bw, Type type, object value)
+        public override void Serialize(BinaryTypesWriter bw, Type type, SerializerSettings settings, ISerializerArg serializerArg, object value)
         {
             var dictionary = value as IDictionary;
             if (dictionary == null)
@@ -39,8 +41,8 @@ namespace BinaryConverter.Serializers
             Type genericArgVal = type.GetGenericArguments()[1];
             foreach (var key in dictionary.Keys)
             {
-                Serializer.SerializeObject(genericArgKey, key, bw);
-                Serializer.SerializeObject(genericArgVal, dictionary[key], bw);
+                Serializer.SerializeObject(genericArgKey, key, bw, settings, null);
+                Serializer.SerializeObject(genericArgVal, dictionary[key], bw, settings, null);
             }
         }
     }

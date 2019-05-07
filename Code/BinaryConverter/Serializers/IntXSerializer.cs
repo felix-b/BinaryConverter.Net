@@ -7,13 +7,13 @@ namespace BinaryConverter.Serializers
     public abstract class BaseInt64Serializer : BaseSerializer
     {
 
-        public override object Deserialize(BinaryTypesReader br, Type type)
+        public override object Deserialize(BinaryTypesReader br, Type type, SerializerSettings settings, ISerializerArg serializerArg)
         {
             var val = br.Read7BitLong();
             return Convert.ChangeType(val, type);
         }
 
-        public override void Serialize(BinaryTypesWriter bw, Type type, object value)
+        public override void Serialize(BinaryTypesWriter bw, Type type, SerializerSettings settings, ISerializerArg serializerArg, object value)
         {
             var val = Convert.ChangeType(value, typeof(long));
             bw.Write7BitLong((long)val);

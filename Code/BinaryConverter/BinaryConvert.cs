@@ -6,12 +6,12 @@ namespace BinaryConverter
     {
         public static T DeserializeObject<T>(byte[] buf)
         {
-            return Deserializer.DeserializeObject<T>(buf);
+            return Serializer.DeserializeObject<T>(buf, null);
         }
 
         public static byte[] SerializeObject<T>(T value)
         {
-            return Serializer.SerializeObject(value);
+            return Serializer.SerializeObject(value, null);
         }
     }
 }

@@ -7,7 +7,7 @@ namespace BinaryConverter.Serializers
 {
     class ListSerializer : BaseSerializer
     {
-        public override object Deserialize(BinaryTypesReader br, Type type)
+        public override object Deserialize(BinaryTypesReader br, Type type, SerializerSettings settings, ISerializerArg serializerArg)
         {
             int count = br.Read7BitInt();
             if (count == -1)
@@ -19,12 +19,12 @@ namespace BinaryConverter.Serializers
 
             for (int i = 0; i < count; i++)
             {
-                instance.Add(Deserializer.DeserializeObject(br, genericArgtype));
+                instance.Add(Serializer.DeserializeObject(br, genericArgtype, settings, null));
             }
             return instance;
         }
 
-        public override void Serialize(BinaryTypesWriter bw, Type type, object value)
+        public override void Serialize(BinaryTypesWriter bw, Type type, SerializerSettings settings, ISerializerArg serializerArg, object value)
         {
             IList list = value as IList;
             if (list == null)
@@ -38,7 +38,7 @@ namespace BinaryConverter.Serializers
             Type genericArgtype = type.GetGenericArguments()[0];
             for (int i = 0; i < count; i++)
             {
-                Serializer.SerializeObject(genericArgtype, list[i], bw);
+                Serializer.SerializeObject(genericArgtype, list[i], bw, settings, null);
             }
         }
     }

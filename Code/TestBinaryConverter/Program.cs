@@ -80,8 +80,8 @@ namespace TestBinaryConverter
                     Char = 'a',
                 },
                 Dec1 = 1234567890.987654m,
-                Real32 = 1234567890.987654321f,
-                Real64 = 1234567890.987654321,
+                Real32 = 17890.987654321f,
+                Real64 = 167890.987654321,
                 //TestEnum = (TestEnum)(17)//.Val1,
                 TestEnum = TestEnum.Val1,
                 IntList = new List<int> { 1, 4, 9, 16 },
@@ -126,6 +126,8 @@ namespace TestBinaryConverter
             var strOrig = JsonConvert.SerializeObject(orig);
             var strCloned = JsonConvert.SerializeObject(cloned);
 
+            Console.WriteLine($"==================================================================");
+            Console.WriteLine($"buf len:\r\n{buf.Length}");
             Console.WriteLine($"==================================================================");
             Console.WriteLine($"strOrig:\r\n {strOrig}");
             Console.WriteLine($"==================================================================");
