@@ -72,6 +72,28 @@ namespace BinaryConverter
             return result * (isNeg ? -1 : 1);
         }
 
+        public ulong Read7BitULong()
+        {
+            ulong result = 0;
+            ulong curByte;
+            bool done = false;
+            int curShift = 0;
+            int nextShiftDiff = 7;
+            byte mask = 0x7F; 
+            do
+            {
+                curByte = ReadByte();
+                if ((curByte & 0x80) == 0)
+                    done = true;
+                curByte &= mask;
+                result |= (curByte << curShift);
+                curShift += nextShiftDiff;
+            }
+            while (!done);
+
+            return result;
+        }
+
         public DateTime ReadDateTime()
         {
             return new DateTime(ReadInt64());

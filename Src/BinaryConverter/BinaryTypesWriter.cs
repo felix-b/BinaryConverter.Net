@@ -105,6 +105,22 @@ namespace BinaryConverter
             while (value != 0);
         }
 
+        public void Write7BitULong(ulong value)
+        {
+            byte lowestByte;
+            byte mask = 0x7F; //
+            int shift = 7;
+            do
+            {
+                lowestByte = (byte)(value & mask);
+                value >>= shift;
+                if (value != 0)
+                    lowestByte |= 0x80;
+                Write(lowestByte);
+            }
+            while (value != 0);
+        }
+
         public void WriteDateTime(DateTime dateTime)
         {
             Write(dateTime.Ticks);
