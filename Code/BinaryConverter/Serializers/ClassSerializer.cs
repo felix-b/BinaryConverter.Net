@@ -10,6 +10,8 @@ namespace BinaryConverter.Serializers
     {
         public override object Deserialize(BinaryTypesReader br, Type type, SerializerSettings settings, ISerializerArg serializerArg)
         {
+            var classMap = SerializerRegistry.GetClassMap(type); //todo: also base types?
+
             var props = type.GetProperties(BindingFlags.Instance | BindingFlags.Public)
                 .OrderBy(x => x.MetadataToken);
 
@@ -18,7 +20,10 @@ namespace BinaryConverter.Serializers
 
             foreach (var prop in props)
             {
-                prop.SetValue(instance, Serializer.DeserializeObject(br, prop.PropertyType, settings, null));
+                MemberMap memberMap = classMap?.GetMemberMap(prop.Name);
+                if (memberMap?.Ignored == true) continue;
+
+                prop.SetValue(instance, Serializer.DeserializeObject(br, prop.PropertyType, settings, memberMap?.Serializer, memberMap?.SerializerArg));
             }
 
             return instance;
@@ -26,14 +31,19 @@ namespace BinaryConverter.Serializers
 
         public override void Serialize(BinaryTypesWriter bw, Type type, SerializerSettings settings, ISerializerArg serializerArg, object value)
         {
+            var classMap = SerializerRegistry.GetClassMap(type); //todo: also base types?
+
             var props = value.GetType().GetProperties()
                 .OrderBy(x => x.MetadataToken)
                 .ToList();
 
             foreach (var prop in props)
             {
+                MemberMap memberMap = classMap?.GetMemberMap(prop.Name);
+                if (memberMap?.Ignored == true) continue;
+
                 var val = prop.GetValue(value);
-                Serializer.SerializeObject(prop.PropertyType, val, bw, settings, null);
+                Serializer.SerializeObject(prop.PropertyType, val, bw, settings, memberMap?.Serializer, memberMap?.SerializerArg);
             }
         }
     }
