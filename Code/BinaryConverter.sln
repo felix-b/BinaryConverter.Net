@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.28010.2016
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BinaryConverter", "BinaryConverter\BinaryConverter.csproj", "{117C629B-F120-42A9-81D5-958C16817642}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BinaryConverter", "BinaryConverter\BinaryConverter.csproj", "{117C629B-F120-42A9-81D5-958C16817642}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestBinaryConverter", "TestBinaryConverter\TestBinaryConverter.csproj", "{E8C79B8C-9B56-4D38-AEAE-0F7CE9F7D880}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BinaryConverter.TestConsole", "BinaryConverter.TestConsole\BinaryConverter.TestConsole.csproj", "{C8567EC8-DE35-4F8D-8C1F-8E6E8F59B8D1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -17,10 +17,10 @@ Global
 		{117C629B-F120-42A9-81D5-958C16817642}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{117C629B-F120-42A9-81D5-958C16817642}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{117C629B-F120-42A9-81D5-958C16817642}.Release|Any CPU.Build.0 = Release|Any CPU
-		{E8C79B8C-9B56-4D38-AEAE-0F7CE9F7D880}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{E8C79B8C-9B56-4D38-AEAE-0F7CE9F7D880}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{E8C79B8C-9B56-4D38-AEAE-0F7CE9F7D880}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{E8C79B8C-9B56-4D38-AEAE-0F7CE9F7D880}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C8567EC8-DE35-4F8D-8C1F-8E6E8F59B8D1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C8567EC8-DE35-4F8D-8C1F-8E6E8F59B8D1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C8567EC8-DE35-4F8D-8C1F-8E6E8F59B8D1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C8567EC8-DE35-4F8D-8C1F-8E6E8F59B8D1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
