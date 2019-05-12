@@ -21,8 +21,8 @@ namespace BinaryConverter.Serializers
             for (int i = 0; i < count; i++)
             {
                 instance.Add(
-                    Serializer.DeserializeObject(br, genericArgKey, settings, null), //key
-                    Serializer.DeserializeObject(br, genericArgVal, settings, null)); //val
+                    Serializer.DeserializeObject(br, genericArgKey, settings, null, null), //key
+                    Serializer.DeserializeObject(br, genericArgVal, settings, null, null)); //val
             }
             return instance;
         }
@@ -41,8 +41,8 @@ namespace BinaryConverter.Serializers
             Type genericArgVal = type.GetGenericArguments()[1];
             foreach (var key in dictionary.Keys)
             {
-                Serializer.SerializeObject(genericArgKey, key, bw, settings, null);
-                Serializer.SerializeObject(genericArgVal, dictionary[key], bw, settings, null);
+                Serializer.SerializeObject(genericArgKey, key, bw, settings, null, null);
+                Serializer.SerializeObject(genericArgVal, dictionary[key], bw, settings, null, null);
             }
         }
     }

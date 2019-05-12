@@ -21,7 +21,7 @@ namespace BinaryConverter.Serializers
 
         public abstract void Serialize(BinaryTypesWriter bw, Type type, SerializerSettings settings, ISerializerArg serializerArg, object value);
 
-        public TARG GetSerializerArg<TARG>(Type type, SerializerSettings settings, ISerializerArg serializerArg) where TARG : class, ISerializerArg
+        public TArg GetSerializerArg<TArg>(Type type, SerializerSettings settings, ISerializerArg serializerArg) where TArg : class, ISerializerArg
         {
             if (serializerArg == null && settings != null)
             {
@@ -33,7 +33,7 @@ namespace BinaryConverter.Serializers
                 serializerArg = SerializerRegistry.GetSerializerArg(type);
             }
 
-            return serializerArg as TARG;
+            return serializerArg as TArg;
         }
     }
 

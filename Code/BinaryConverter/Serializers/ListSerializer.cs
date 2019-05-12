@@ -19,7 +19,7 @@ namespace BinaryConverter.Serializers
 
             for (int i = 0; i < count; i++)
             {
-                instance.Add(Serializer.DeserializeObject(br, genericArgtype, settings, null));
+                instance.Add(Serializer.DeserializeObject(br, genericArgtype, settings, null, null));
             }
             return instance;
         }
@@ -38,7 +38,7 @@ namespace BinaryConverter.Serializers
             Type genericArgtype = type.GetGenericArguments()[0];
             for (int i = 0; i < count; i++)
             {
-                Serializer.SerializeObject(genericArgtype, list[i], bw, settings, null);
+                Serializer.SerializeObject(genericArgtype, list[i], bw, settings, null, null);
             }
         }
     }

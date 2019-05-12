@@ -11,6 +11,7 @@ namespace BinaryConverter
     {
         private static ConcurrentDictionary<Type, ISerializer> _serializerMap { get; set; } = new ConcurrentDictionary<Type, ISerializer>();
         private static ConcurrentDictionary<Type, ISerializerArg> _serializerArgMap { get; set; } = new ConcurrentDictionary<Type, ISerializerArg>();
+        private static ConcurrentDictionary<Type, IClassMap> _classMapMap { get; set; } = new ConcurrentDictionary<Type, IClassMap>();
 
         public static void RegisterSerializer(Type type, ISerializer serializer)
         {
@@ -33,6 +34,17 @@ namespace BinaryConverter
         {
             _serializerArgMap.TryGetValue(type, out var serializerArg);
             return serializerArg;
+        }
+
+        public static void RegisterClassMap(Type type, IClassMap classMap)
+        {
+            _classMapMap[type] = classMap;
+        }
+
+        public static IClassMap GetClassMap(Type type)
+        {
+            _classMapMap.TryGetValue(type, out var classMap);
+            return classMap;
         }
 
         static SerializerRegistry()

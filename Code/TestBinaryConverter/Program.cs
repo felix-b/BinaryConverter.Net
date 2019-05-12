@@ -1,4 +1,5 @@
 ﻿using BinaryConverter;
+using BinaryConverter.Serializers;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -63,7 +64,7 @@ namespace TestBinaryConverter
             var orig = new Record
             {
                 Id = 7,
-                Time = DateTime.UtcNow.Date,
+                Time = DateTime.UtcNow,
                 Comment = null,//"Bla!",
                 SubRecord = new SubRecord
                 {
@@ -119,9 +120,18 @@ namespace TestBinaryConverter
 
             //orig.SubRecordDict = null;
 
-            var buf = BinaryConvert.SerializeObject(orig);
+            var settings = new SerializerSettings();
+            //settings.SerializerArgMap[typeof(DateTime)] = new DateTimeSerializerArg() { TickResolution = TimeSpan.TicksPerDay };// RegisterSerializerArg(typeof(DateTime), );
 
-            var cloned = BinaryConvert.DeserializeObject<Record>(buf);
+            SerializerRegistry.RegisterClassMap(typeof(Record), new ClassMap<Record>(cm => 
+            {
+                //cm.MapProperty(p => p.Time).Ignored = true;
+                cm.MapProperty(p => p.Time).SerializerArg = new DateTimeSerializerArg() { TickResolution = TimeSpan.TicksPerMinute };
+            }));
+
+            var buf = BinaryConvert.SerializeObject(orig, settings);
+
+            var cloned = BinaryConvert.DeserializeObject<Record>(buf, settings);
 
             var strOrig = JsonConvert.SerializeObject(orig);
             var strCloned = JsonConvert.SerializeObject(cloned);

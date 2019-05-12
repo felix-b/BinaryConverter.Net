@@ -29,13 +29,13 @@ namespace BinaryConverter
             {
                 using (BinaryTypesWriter bw = new BinaryTypesWriter(ms))
                 {
-                    SerializeObject(typeof(T), value, bw, settings, null);
+                    SerializeObject(typeof(T), value, bw, settings, null, null);
                     return ms.ToArray();
                 }
             }
         }
 
-        internal static void SerializeObject<T>(Type type, T value, BinaryTypesWriter bw, SerializerSettings settings, ISerializer serializer)
+        internal static void SerializeObject<T>(Type type, T value, BinaryTypesWriter bw, SerializerSettings settings, ISerializer serializer, ISerializerArg serializerArg)
         {
             if (serializer == null)
             {
@@ -53,14 +53,14 @@ namespace BinaryConverter
                     }
                 }
 
-                serializer.Serialize(bw, type, settings, null, value);
+                serializer.Serialize(bw, type, settings, serializerArg, value);
                 return;
             }
 
             if (type.IsEnum)
             {
                 serializer = SerializerRegistry.GetSerializer(typeof(Enum));
-                serializer.Serialize(bw, type, settings, null, value);
+                serializer.Serialize(bw, type, settings, serializerArg, value);
                 return;
             }
 
@@ -71,7 +71,7 @@ namespace BinaryConverter
                     serializer = SerializerRegistry.GetSerializer(type.GetGenericTypeDefinition());
                     if (serializer != null)
                     {
-                        serializer.Serialize(bw, type, settings, null, value);
+                        serializer.Serialize(bw, type, settings, serializerArg, value);
                         return;
                     }
                 }
@@ -83,7 +83,7 @@ namespace BinaryConverter
                 }
 
                 serializer = SerializerRegistry.GetSerializer(typeof(object));
-                serializer.Serialize(bw, type, settings, null, value);
+                serializer.Serialize(bw, type, settings, serializerArg, value);
                 return;
             }
 
@@ -108,12 +108,12 @@ namespace BinaryConverter
 
                 using (BinaryTypesReader br = new BinaryTypesReader(ms))
                 {
-                    return DeserializeObject(br, type, null, null);
+                    return DeserializeObject(br, type, settings, null, null);
                 }
             }
         }
 
-        internal static object DeserializeObject(BinaryTypesReader br, Type type, SerializerSettings settings, ISerializer serializer)
+        internal static object DeserializeObject(BinaryTypesReader br, Type type, SerializerSettings settings, ISerializer serializer, ISerializerArg serializerArg)
         {
             if (serializer == null)
             {
@@ -130,13 +130,13 @@ namespace BinaryConverter
                     }
                 }
 
-                return serializer.Deserialize(br, type, settings, null);
+                return serializer.Deserialize(br, type, settings, serializerArg);
             }
 
             if (type.IsEnum)
             {
                 serializer = SerializerRegistry.GetSerializer(typeof(Enum));
-                return serializer.Deserialize(br, type, settings, null);
+                return serializer.Deserialize(br, type, settings, serializerArg);
             }
 
             if (type.IsClass)
@@ -146,7 +146,7 @@ namespace BinaryConverter
                     serializer = SerializerRegistry.GetSerializer(type.GetGenericTypeDefinition());
                     if (serializer != null)
                     {
-                        return serializer.Deserialize(br, type, settings, null);
+                        return serializer.Deserialize(br, type, settings, serializerArg);
                     }
                 }
 
@@ -156,7 +156,7 @@ namespace BinaryConverter
                 }
 
                 serializer = SerializerRegistry.GetSerializer(typeof(object));
-                return serializer.Deserialize(br, type, settings, null);
+                return serializer.Deserialize(br, type, settings, serializerArg);
             }
 
             throw new Exception($"DeserializeObject: serializer not found for type {type.FullName}");
