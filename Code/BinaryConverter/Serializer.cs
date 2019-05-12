@@ -37,57 +37,22 @@ namespace BinaryConverter
 
         internal static void SerializeObject<T>(Type type, T value, BinaryTypesWriter bw, SerializerSettings settings, ISerializer serializer, ISerializerArg serializerArg)
         {
+            serializer = GetSerializer(type, serializer);
             if (serializer == null)
             {
-                serializer = SerializerRegistry.GetSerializer(type);
+                throw new Exception($"SerializeObject: serializer not found for type {type.FullName}");
             }
 
-            if (serializer != null)
+            if (type.IsClass && serializer.CommonNullHandle)
             {
-                if (type.IsClass)
-                {
-                    bw.Write(value != null);
-                    if (value == null)
-                    {
-                        return;
-                    }
-                }
-
-                serializer.Serialize(bw, type, settings, serializerArg, value);
-                return;
-            }
-
-            if (type.IsEnum)
-            {
-                serializer = SerializerRegistry.GetSerializer(typeof(Enum));
-                serializer.Serialize(bw, type, settings, serializerArg, value);
-                return;
-            }
-
-            if (type.IsClass)
-            {
-                if (type.IsGenericType)
-                {
-                    serializer = SerializerRegistry.GetSerializer(type.GetGenericTypeDefinition());
-                    if (serializer != null)
-                    {
-                        serializer.Serialize(bw, type, settings, serializerArg, value);
-                        return;
-                    }
-                }
-
                 bw.Write(value != null);
                 if (value == null)
                 {
                     return;
                 }
-
-                serializer = SerializerRegistry.GetSerializer(typeof(object));
-                serializer.Serialize(bw, type, settings, serializerArg, value);
-                return;
             }
 
-            throw new Exception($"SerializeObject: serializer not found for type {type.FullName}");
+            serializer.Serialize(bw, type, settings, serializerArg, value);
 
         }
 
@@ -115,56 +80,66 @@ namespace BinaryConverter
 
         internal static object DeserializeObject(BinaryTypesReader br, Type type, SerializerSettings settings, ISerializer serializer, ISerializerArg serializerArg)
         {
+            serializer = GetSerializer(type, serializer);
             if (serializer == null)
             {
-                serializer = SerializerRegistry.GetSerializer(type);
+                throw new Exception($"SerializeObject: serializer not found for type {type.FullName}");
             }
 
-            if (serializer != null)
+            if (type.IsClass && serializer.CommonNullHandle)
             {
-                if (type.IsClass)
-                {
-                    if (br.ReadBoolean() == false) //null
-                    {
-                        return null;
-                    }
-                }
-
-                return serializer.Deserialize(br, type, settings, serializerArg);
-            }
-
-            if (type.IsEnum)
-            {
-                serializer = SerializerRegistry.GetSerializer(typeof(Enum));
-                return serializer.Deserialize(br, type, settings, serializerArg);
-            }
-
-            if (type.IsClass)
-            {
-                if (type.IsGenericType)
-                {
-                    serializer = SerializerRegistry.GetSerializer(type.GetGenericTypeDefinition());
-                    if (serializer != null)
-                    {
-                        return serializer.Deserialize(br, type, settings, serializerArg);
-                    }
-                }
-
                 if (br.ReadBoolean() == false) //null
                 {
                     return null;
                 }
-
-                serializer = SerializerRegistry.GetSerializer(typeof(object));
-                return serializer.Deserialize(br, type, settings, serializerArg);
             }
 
-            throw new Exception($"DeserializeObject: serializer not found for type {type.FullName}");
+            return serializer.Deserialize(br, type, settings, serializerArg);
+
+
+
         }
 
         //===============================================================================================
         // 
         //===============================================================================================
 
+
+        private static ISerializer GetSerializer(Type type, ISerializer serializer)
+        {
+            if (serializer != null)
+            {
+                return serializer;
+            }
+
+            serializer = SerializerRegistry.GetSerializer(type);
+            if (serializer != null)
+            {
+                return serializer;
+            }
+
+
+            if (type.IsGenericType)
+            {
+                serializer = SerializerRegistry.GetSerializer(type.GetGenericTypeDefinition());
+                if (serializer != null)
+                {
+                    return serializer;
+                }
+            }
+
+            if (type.IsEnum)
+            {
+                return SerializerRegistry.GetSerializer(typeof(Enum));
+            }
+
+            if (type.IsClass && serializer == null)
+            {
+
+                return SerializerRegistry.GetSerializer(typeof(object));
+            }
+
+            return null;
+        }
     }
 }

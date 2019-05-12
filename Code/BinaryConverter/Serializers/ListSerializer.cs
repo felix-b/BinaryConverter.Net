@@ -7,6 +7,8 @@ namespace BinaryConverter.Serializers
 {
     class ListSerializer : BaseSerializer
     {
+        public override bool CommonNullHandle { get { return false; } }
+
         public override object Deserialize(BinaryTypesReader br, Type type, SerializerSettings settings, ISerializerArg serializerArg)
         {
             int count = br.Read7BitInt();

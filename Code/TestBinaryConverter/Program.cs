@@ -64,7 +64,7 @@ namespace TestBinaryConverter
             var orig = new Record
             {
                 Id = 7,
-                Time = DateTime.UtcNow,
+                Time = new DateTime((DateTime.UtcNow.Ticks / TimeSpan.TicksPerSecond) * TimeSpan.TicksPerSecond),
                 Comment = null,//"Bla!",
                 SubRecord = new SubRecord
                 {
