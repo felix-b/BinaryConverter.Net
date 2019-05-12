@@ -6,6 +6,8 @@ namespace BinaryConverter.Serializers
 {
     public interface ISerializer
     {
+        bool CommonNullHandle { get; }
+
         object Deserialize(BinaryTypesReader br, Type type, SerializerSettings settings, ISerializerArg serializerArg);
 
         void Serialize(BinaryTypesWriter bw, Type type, SerializerSettings settings, ISerializerArg serializerArg, object value);
@@ -17,6 +19,8 @@ namespace BinaryConverter.Serializers
 
     public abstract class BaseSerializer : ISerializer
     {
+        public virtual bool CommonNullHandle { get { return true; } }
+
         public abstract object Deserialize(BinaryTypesReader br, Type type, SerializerSettings settings, ISerializerArg serializerArg);
 
         public abstract void Serialize(BinaryTypesWriter bw, Type type, SerializerSettings settings, ISerializerArg serializerArg, object value);
