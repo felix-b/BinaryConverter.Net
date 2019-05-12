@@ -17,6 +17,7 @@ namespace BinaryConverter.Tests.TestSystemTypes
             var cloned = BinaryConvert.DeserializeObject<int>(buf);
             Assert.AreEqual(val, cloned);
         }
+
         [TestMethod]
         public void Test_Int32Negative()
         {
@@ -25,6 +26,7 @@ namespace BinaryConverter.Tests.TestSystemTypes
             var cloned = BinaryConvert.DeserializeObject<int>(buf);
             Assert.AreEqual(val, cloned);
         }
+
         [TestMethod]
         public void Test_Int32Max()
         {
@@ -65,7 +67,7 @@ namespace BinaryConverter.Tests.TestSystemTypes
         [TestMethod]
         public void Test_Int64Max()
         {
-            Int64 val = Int64.MinValue;
+            Int64 val = Int64.MaxValue;
             var buf = BinaryConvert.SerializeObject(val);
             var cloned = BinaryConvert.DeserializeObject<Int64>(buf);
             Assert.AreEqual(val, cloned);
