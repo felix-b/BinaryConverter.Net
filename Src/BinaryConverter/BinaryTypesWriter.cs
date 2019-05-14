@@ -62,7 +62,8 @@ namespace BinaryConverter
         public void WriteCompactDecimal(decimal value, int digits)
         {
             int sign = value > 0 ? 1 : -1;
-            Write7BitLong((long)((value * (decimal)Math.Pow(10, digits)) + (sign * 0.5M)));
+            long mantisa = (long)((value * (decimal)Math.Pow(10, digits)) + (sign * 0.5M));
+            Write7BitLong(mantisa);
         }
 
 

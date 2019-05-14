@@ -10,7 +10,7 @@ namespace BinaryConverter.Tests.TestSystemTypes
     public class DateTimeTests
     {
         [TestMethod]
-        public void Test_DateTime()
+        public void Test_DateTimeTickResolution()
         {
             var settings = new SerializerSettings();
             settings.SerializerArgMap[typeof(DateTime)] = new DateTimeSerializerArg() { TickResolution = 1 };
@@ -18,7 +18,37 @@ namespace BinaryConverter.Tests.TestSystemTypes
             var val = DateTime.Now;
             var buf = BinaryConvert.SerializeObject(val, settings);
             var cloned = BinaryConvert.DeserializeObject<DateTime>(buf, settings);
+
             Assert.AreEqual(val, cloned);
+            Assert.AreEqual(buf.Length, 9); //better not to use 7-bit
+        }
+
+        [TestMethod]
+        public void Test_DateTimeSecondResolution()
+        {
+            var settings = new SerializerSettings();
+            settings.SerializerArgMap[typeof(DateTime)] = new DateTimeSerializerArg() { TickResolution = TimeSpan.TicksPerSecond };
+            var val = new DateTime(2010, 10, 10, 10, 10, 10);
+
+            var buf = BinaryConvert.SerializeObject(val, settings);
+            var cloned = BinaryConvert.DeserializeObject<DateTime>(buf, settings);
+
+            Assert.AreEqual(val, cloned);
+            Assert.AreEqual(buf.Length, 6);
+        }
+
+        [TestMethod]
+        public void Test_DateTimeDayResolution()
+        {
+            var settings = new SerializerSettings();
+            settings.SerializerArgMap[typeof(DateTime)] = new DateTimeSerializerArg() { TickResolution = TimeSpan.TicksPerDay};
+            var val = new DateTime(2010, 10, 10);
+
+            var buf = BinaryConvert.SerializeObject(val, settings);
+            var cloned = BinaryConvert.DeserializeObject<DateTime>(buf, settings);
+
+            Assert.AreEqual(val, cloned);
+            Assert.AreEqual(buf.Length, 3);
         }
     }
 }
