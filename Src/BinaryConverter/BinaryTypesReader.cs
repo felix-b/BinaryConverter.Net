@@ -35,7 +35,8 @@ namespace BinaryConverter
         //Note: if we know the digits in advance - we save the reading/writing of the exponent
         public decimal ReadCompactDecimal(int digits)
         {
-            return Read7BitLong() / (decimal)Math.Pow(10, digits);
+            long mantisa = Read7BitLong();
+            return mantisa / (decimal)Math.Pow(10, digits);
         }
 
         public long Read7BitLong()
@@ -79,7 +80,7 @@ namespace BinaryConverter
             bool done = false;
             int curShift = 0;
             int nextShiftDiff = 7;
-            byte mask = 0x7F; 
+            byte mask = 0x7F;
             do
             {
                 curByte = ReadByte();
