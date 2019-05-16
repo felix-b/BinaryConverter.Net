@@ -1,4 +1,5 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using BinaryConverter.Tests.Models;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -81,32 +82,18 @@ namespace BinaryConverter.Tests.TestCollections
 
         }
 
-        public class Poco
-        {
-            public int Int { get; set; }
-            public string Str { get; set; }
-
-            public override bool Equals(object other)
-            {
-                var toCompareWith = other as Poco;
-                if (toCompareWith == null)
-                    return false;
-                return this.Int == toCompareWith.Int && this.Str == toCompareWith.Str;
-            }
-        }
-
         [TestMethod]
         public void Test_ListOfObjects()
         {
-            var val = new List<Poco>() {
-                new Poco() {Int = 1, Str = "1" } ,
-                new Poco() {Int = 2, Str = "2" } ,
-                new Poco() {Int = 3, Str = "3" } ,
+            var val = new List<PocoSimple>() {
+                new PocoSimple() {Int = 1, Str = "1" } ,
+                new PocoSimple() {Int = 2, Str = "2" } ,
+                new PocoSimple() {Int = 3, Str = "3" } ,
                  null
             };
 
             var buf = BinaryConvert.SerializeObject(val);
-            var cloned = BinaryConvert.DeserializeObject<List<Poco>>(buf);
+            var cloned = BinaryConvert.DeserializeObject<List<PocoSimple>>(buf);
 
             CollectionAssert.AreEqual(val, cloned);
 

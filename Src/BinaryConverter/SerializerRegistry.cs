@@ -41,6 +41,11 @@ namespace BinaryConverter
             _classMapMap[type] = classMap;
         }
 
+        public static void UnregisterClassMap(Type type)
+        {
+            _classMapMap.TryRemove(type, out var unused);
+        }
+
         public static IClassMap GetClassMap(Type type)
         {
             _classMapMap.TryGetValue(type, out var classMap);
